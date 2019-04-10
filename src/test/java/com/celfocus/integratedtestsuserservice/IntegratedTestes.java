@@ -2,7 +2,6 @@ package com.celfocus.integratedtestsuserservice;
 
 import com.celfocus.integratedtestsuserservice.dto.Car;
 import com.celfocus.integratedtestsuserservice.dto.InputBody;
-import com.celfocus.integratedtestsuserservice.dto.User;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import io.restassured.http.ContentType;
@@ -10,7 +9,6 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.openqa.selenium.json.Json;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -21,8 +19,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static io.restassured.RestAssured.*;
-import static org.hamcrest.Matchers.*;
+import static io.restassured.RestAssured.given;
+import static io.restassured.RestAssured.when;
+import static org.hamcrest.Matchers.equalTo;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -39,12 +38,6 @@ public class IntegratedTestes {
 
     @Value(value = "${user-service-host}")
     public String userServiceHost;
-
-    @Value(value = "${car-service-port}")
-    public String carServicePort;
-
-    @Value(value = "${car-service-host}")
-    public String carServiceHost;
 
     public Long user_id;
 
@@ -82,12 +75,28 @@ public class IntegratedTestes {
 
         Arrays.asList(sqlStatements).forEach(sql -> {
             List<Long> notEmptyList = jdbcTemplate.queryForList(sql, Long.class);
+            System.out.println(notEmptyList);
             Assert.assertFalse(notEmptyList.isEmpty());
         });
     }
 
     @Test
     public void deleteUserTest() {
+
+        String sqlStatements[] = {
+                "INSERT INTO User (user_id, first_name, last_name, nif) VALUES ('101', 'Ines', 'Madureira', '254668987')"
+        };
+
+        Arrays.asList(sqlStatements).forEach(sql -> {
+            jdbcTemplate.execute(sql);
+        });
+
+        String sqlStatements1[] = {
+                "SELECT user_id FROM User WHERE nif = '254668987'"};
+        Arrays.asList(sqlStatements1).forEach(sql -> {
+            System.out.println(jdbcTemplate.queryForList(sql, Long.class));
+        });
+
 
         InputBody input = new InputBody();
 
@@ -100,12 +109,11 @@ public class IntegratedTestes {
                 when().delete("http://" + userServiceHost + ":" + userServicePort + "/userService").
                 then().assertThat().statusCode(200);
 
-        String sqlStatements[] = {
-                "SELECT user_id FROM User WHERE nif = '254668987'"};
 
-        Arrays.asList(sqlStatements).forEach(sql -> {
-            List<User> emtyList = new ArrayList<>();
-            emtyList = jdbcTemplate.queryForList(sql, User.class);
+        Arrays.asList(sqlStatements1).forEach(sql -> {
+            List<Long> emtyList = new ArrayList<>();
+            emtyList = jdbcTemplate.queryForList(sql, Long.class);
+            System.out.println(emtyList);
             Assert.assertTrue(emtyList.isEmpty());
         });
     }

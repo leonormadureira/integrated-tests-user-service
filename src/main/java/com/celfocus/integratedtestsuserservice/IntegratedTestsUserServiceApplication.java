@@ -12,14 +12,18 @@ import org.springframework.jdbc.core.JdbcTemplate;
 @SpringBootApplication
 public class IntegratedTestsUserServiceApplication {
 
+	public IntegratedTestsUserServiceApplication(JdbcTemplate jdbcTemplate) {
+		this.jdbcTemplate = jdbcTemplate;
+	}
+
 	public static void main(String[] args) {
 		SpringApplication.run(IntegratedTestsUserServiceApplication.class, args);
 	}
 
-	@Autowired
+	final
 	JdbcTemplate jdbcTemplate;
 
-	@PostConstruct
+	/*@PostConstruct
 	private void initDb() {
 		String sqlStatements[] = {
 				"INSERT INTO User (user_id, first_name, last_name, nif) VALUES ('101', 'Ines', 'Madureira', '254668987')"
@@ -28,5 +32,5 @@ public class IntegratedTestsUserServiceApplication {
 		Arrays.asList(sqlStatements).forEach(sql -> {
 			jdbcTemplate.execute(sql);
 		});
-	}
+	}*/
 }
